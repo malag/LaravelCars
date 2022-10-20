@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\CarController;
+use App\Http\Controllers\UserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,20 +15,25 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
+//Con auth
+Route::middleware(['auth'])->group(function () {
+    Route::get('/car/{car}/edit', [CarController::class, 'edit']);
+    Route::delete('/car/{car}', [CarController::class, 'destroy']);
+    Route::post('/car', [CarController::class, 'save']);
+    Route::put('/car/{car}', [CarController::class, 'update']);
+    //user
+    Route::post('/logout', [UserController::class, 'logout']);
 });
 
-Route::get('/cars', function () {
-    return view('cars', [
-        'title' => 'Cars',
-        'movies' => Car::all()
-    ]);
-});
+Route::get('/car/create', [CarController::class, 'create']);
+Route::get('/', [CarController::class, 'index']);
+Route::get('/cars', [CarController::class, 'index']);
+Route::get('/car/{car}', [CarController::class, 'show']);
 
-Route::get('/car/{id}', function ($id) {
-    return view('car', [
-        
-        'car' => Car::find($id)
-    ]);
+//USER
+Route::middleware(['guest'])->group(function () {
+    Route::get('/register', [UserController::class, 'create']);
+    Route::get('/login', [UserController::class, 'login'])->name('login');
+    Route::post('/users/authenticate', [UserController::class, 'authenticate']);
 });
+Route::post('/users', [UserController::class, 'store']);
